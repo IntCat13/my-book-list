@@ -6,22 +6,37 @@ import './NavMenu.css';
 export class NavMenu extends Component {
   static displayName = NavMenu.name;
 
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.toggleNavbar = this.toggleNavbar.bind(this);
     this.state = {
-      collapsed: true
+      collapsed: true,
+      isAuthenticated: false
     };
   }
 
-  toggleNavbar () {
+  componentDidMount() {
+    const token = localStorage.getItem('token');
+    const isAuthenticated = !!token;
+
+    this.setState({ isAuthenticated });
+  }
+  
+  handleLogOut() {
+    localStorage.removeItem('token');
+    window.location.assign('/');
+  }
+
+  toggleNavbar() {
     this.setState({
       collapsed: !this.state.collapsed
     });
   }
 
   render() {
+    const { isAuthenticated } = this.state;
+
     return (
       <header>
         <Navbar className="navbar-expand-sm navbar-toggleable-sm ng-white border-bottom box-shadow mb-3" container light>
@@ -29,15 +44,31 @@ export class NavMenu extends Component {
           <NavbarToggler onClick={this.toggleNavbar} className="mr-2" />
           <Collapse className="d-sm-inline-flex flex-sm-row-reverse" isOpen={!this.state.collapsed} navbar>
             <ul className="navbar-nav flex-grow">
-              <NavItem>
-                <NavLink tag={Link} className="text-dark" to="/">Home</NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink tag={Link} className="text-dark" to="/counter">Counter</NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink tag={Link} className="text-dark" to="/fetch-data">Fetch data</NavLink>
-              </NavItem>
+              {isAuthenticated ? (
+                <>
+                  <NavItem>
+                    <NavLink tag={Link} className="text-dark" to="/books">Books</NavLink>
+                  </NavItem>
+                  <NavItem>
+                    <NavLink tag={Link} className="text-dark" to="/mylist">My books</NavLink>
+                  </NavItem>
+                  <NavItem>
+                    <NavLink onClick={() => this.handleLogOut()}>Logout</NavLink>
+                  </NavItem>
+                </>
+              ) : (
+                <>
+                  <NavItem>
+                    <NavLink tag={Link} className="text-dark" to="/books">Books</NavLink>
+                  </NavItem>
+                  <NavItem>
+                    <NavLink tag={Link} className="text-dark" to="/login">Login</NavLink>
+                  </NavItem>
+                  <NavItem>
+                    <NavLink tag={Link} className="text-dark" to="/register">Register</NavLink>
+                  </NavItem>
+                </>
+              )}
             </ul>
           </Collapse>
         </Navbar>
